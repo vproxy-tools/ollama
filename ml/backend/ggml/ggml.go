@@ -297,12 +297,12 @@ func New(r *os.File, params ml.BackendParams) (ml.Backend, error) {
 		}
 	}
 
-	// concurrently read in tensor data. uses a section reader which is safe for concurrent reads
+	// read in tensor data. uses a section reader which is safe for concurrent reads
 	sr := io.NewSectionReader(r, int64(meta.Tensors().Offset), n-int64(meta.Tensors().Offset))
 	var g errgroup.Group
 	for _, t := range meta.Tensors().Items() {
 		for _, target := range targets[t.Name] {
-			g.Go(func() error {
+			func() error {
 				if target == "" {
 					target = t.Name
 				}
@@ -322,9 +322,9 @@ func New(r *os.File, params ml.BackendParams) (ml.Backend, error) {
 					return errors.New("short read")
 				}
 
-				C.ggml_backend_tensor_set(tt, unsafe.Pointer(&bts[0]), 0, C.size_t(t.Size()))
+				C.ggml_backend_tensor_set_numa(tt, unsafe.Pointer(&bts[0]), 0, C.size_t(t.Size()))
 				return nil
-			})
+			}()
 		}
 	}
 

@@ -1,6 +1,6 @@
-UPSTREAM=https://github.com/ggerganov/llama.cpp.git
+UPSTREAM=https://github.com/vproxy-tools/llama.cpp.git
 WORKDIR=llama/vendor
-FETCH_HEAD=d7cfe1ffe0f435d0048a6058d529daf76e072d9c
+FETCH_HEAD=96bc43c61bd511a0812f8d65c8a0fc817994f69f
 
 .PHONY: help
 help:

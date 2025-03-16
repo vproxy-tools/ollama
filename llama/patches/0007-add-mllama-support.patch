@@ -261,7 +261,7 @@ index 47e79ed4..7b22fe13 100644
 +        if (lctx.inp_cross_attn_state && lctx.inp_cross_attn_state->buffer) {
 +            ggml_backend_tensor_set(lctx.inp_cross_attn_state, ubatch.embd, 0, ggml_nbytes(lctx.inp_cross_attn_state));
 +            // zero out inp_embd since it's not used
-+            float * inp_embd_data = (float *)lctx.inp_embd->data;
++            float * inp_embd_data = (float *)tensor_data(lctx.inp_embd);
 +            for (int i = 0; i < ggml_nelements(lctx.inp_embd); ++i) {
 +                inp_embd_data[i] = 0.0f;
 +            }

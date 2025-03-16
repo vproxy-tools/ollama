@@ -64,7 +64,7 @@ index 72325349..2f606d82 100644
 +
 +    GGML_TENSOR_UNARY_OP_LOCALS
 +
-+    float * dst_ptr = (float *) dst->data;
++    float * dst_ptr = (float *) tensor_data(dst);
 +
 +    // TODO: optimize
 +
@@ -74,7 +74,7 @@ index 72325349..2f606d82 100644
 +                for (int64_t i3 = 0; i3 < ne3; ++i3) {
 +                    const int64_t dst_idx = i3*(ne0*ne1*ne2) + i2*(ne0*ne1) + i1*ne0 + i0;
 +
-+                    const float * src_ptr = (const float *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
++                    const float * src_ptr = (const float *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
 +
 +                    if (i0 < ne00 && i1 < ne01 && i2 < ne02 && i3 < ne03) {
 +                        dst_ptr[dst_idx] = *src_ptr;
@@ -189,8 +189,8 @@ index aba539e8..b4b87409 100644
 +
 +void ggml_cuda_op_unpad(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
 +    const ggml_tensor * src0 = dst->src[0];
-+    const float * src0_d = (const float *)src0->data;
-+    float * dst_d = (float *)dst->data;
++    const float * src0_d = (const float *)tensor_data(src0);
++    float * dst_d = (float *)tensor_data(dst);
 +    cudaStream_t stream = ctx.stream();
 +
 +    GGML_ASSERT(src0->type == GGML_TYPE_F32);

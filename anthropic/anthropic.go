@@ -77,6 +77,7 @@ type MessagesRequest struct {
 	Tools         []Tool          `json:"tools,omitempty"`
 	ToolChoice    *ToolChoice     `json:"tool_choice,omitempty"`
 	Thinking      *ThinkingConfig `json:"thinking,omitempty"`
+	OutputConfig  *OutputConfig   `json:"output_config,omitempty"`
 	Metadata      *Metadata       `json:"metadata,omitempty"`
 }
 
@@ -187,8 +188,13 @@ type ToolChoice struct {
 
 // ThinkingConfig controls extended thinking
 type ThinkingConfig struct {
-	Type         string `json:"type"` // "enabled" or "disabled"
+	Type         string `json:"type"` // "enabled", "disabled", or "adaptive"
 	BudgetTokens int    `json:"budget_tokens,omitempty"`
+}
+
+// OutputConfig carries per-request output preferences
+type OutputConfig struct {
+	Effort string `json:"effort,omitempty"` // "max", "high", "medium", "low"
 }
 
 // Metadata for the request
@@ -373,8 +379,26 @@ func FromMessagesRequest(r MessagesRequest) (*api.ChatRequest, error) {
 	}
 
 	var think *api.ThinkValue
-	if r.Thinking != nil && r.Thinking.Type == "enabled" {
-		think = &api.ThinkValue{Value: true}
+	if r.Thinking == nil {
+		think = &api.ThinkValue{Value: false}
+	} else {
+		switch r.Thinking.Type {
+		case "disabled":
+			think = &api.ThinkValue{Value: false}
+		case "adaptive":
+			if r.OutputConfig != nil && r.OutputConfig.Effort != "" {
+				effort := r.OutputConfig.Effort
+				if effort == "low" {
+					think = &api.ThinkValue{Value: false}
+				} else {
+					think = &api.ThinkValue{Value: true}
+				}
+			} else {
+				think = &api.ThinkValue{Value: false}
+			}
+		case "enabled":
+			think = &api.ThinkValue{Value: true}
+		}
 	}
 
 	stream := r.Stream
